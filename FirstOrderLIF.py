@@ -24,11 +24,12 @@ class FirstOrderLIF:
         self.tau_ref = tau_ref # refractory period
         self.v = v_init # initial potential
         self.v_th = v_th # threshold potential
+        self.v_init = v_init
 
         self.output = 0
         self.refractory_time = 0
 
-    # advance 1 time step and return output of neuron
+    # advance 1 time step and return output of neurone
     def step(self, I, T_step): 
         self.refractory_time -= T_step
 
@@ -47,7 +48,17 @@ class FirstOrderLIF:
             self.output = 0
         
         return self.output
+    
+    # reset neurone to initial state
+    def reset(self):
+        self.output = self.refractory_time = 0
+        self.v = self.v_init
 
+def getGainBias(maxRate, intercept, tau_rc, tau_ref, v_th):
+    gain = v_th * (1 - 1 / (1 - np.exp((tau_ref - 1/maxRate) / tau_rc))) / (intercept - 1)
+    bias = v_th - gain * intercept
+
+    return gain, bias
 
 def graph_potential(times, v_history, graph_title="", filename=""):
     plt.figure() # Create a new figure

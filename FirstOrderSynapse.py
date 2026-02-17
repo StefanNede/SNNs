@@ -12,6 +12,9 @@ class FirstOrderSynapse:
         # discrete update equation here 
         self.g = self.g * (1 - T_step/self.tau_s) + input_current * T_step/self.tau_s
         return self.g
+    
+    def reset(self):
+        self.g = 0
 
 # neuron and synapse combined step 
 def combinedStep(neuron, synapse, input_current, T_step):
