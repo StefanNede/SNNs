@@ -1,26 +1,25 @@
 # Vectorised collection of analytical synapses
 import numpy as np
 
-# TODO: complete docstrings
 class SynapseCollection:
     def __init__(self, n=1, tau_s=0.05, T_step=0.001):
         """
         Args:
-            n (int, optional): _description_. Defaults to 1.
-            tau_s (float, optional): _description_. Defaults to 0.05.
-            T_step (float, optional): _description_. Defaults to 0.001.
+            n (int, optional): number of pre-synaptic neurones/synapses
+            tau_s (float, optional): decay rate of synapse
+            T_step (float, optional): time step of simulation
         """
-        self.n = n
+        self.n = n # 
         self.a = np.exp(-T_step / tau_s) # decay factor for synaptic current <- precalculated for performance gains
         self.b = 1 - self.a # scale factor for input current
 
         self.voltage = np.zeros(n) # initial voltage of neurons
 
     def step(self, inputs):
-        """_summary_
+        """ Move forward one time step for synapse (applying analytically derived discrete update formula)
 
         Args:
-            inputs (_type_): _description_
+            inputs (Array[Float]): inputs from LIFCollectoin -> has dimension self.n
         """
         self.voltage = self.a * self.voltage + self.b * inputs
         return self.voltage
