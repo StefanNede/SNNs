@@ -29,7 +29,7 @@ class AnalyticalLIF:
         leak_factor = actual_time/self.tau_rc
         self.v = I + (self.v - I) * math.exp(-leak_factor) 
 
-        if self.v >= self.v_th: # Voltage is above the threshold
+        if self.v > self.v_th: # Voltage is above the threshold
             spike_time = actual_time + self.tau_rc * math.log((self.v - I) / (self.v_th - I)) 
             self.refractory_time = self.tau_ref + spike_time - actual_time
         
