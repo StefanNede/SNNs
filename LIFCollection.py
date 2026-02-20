@@ -58,11 +58,11 @@ class LIFCollection:
         )
 
         # Calculate input current (by applying encoders, gains and biases)
-        #    - treats inputs as a column vector
         #    - dot product of each input with each encoder -> array of e_i . input_i
-        #    - then element-wise multiplication by self.gain_i 
-        #    - and element-wise addition by self.bias_i
-        I = np.dot(self.encoders, inputs) * self.gain + self.bias
+        #    - then element-wise multiplication by self.gains_i 
+        #    - and element-wise addition by self.biases_i
+        dot_product = np.sum(inputs * self.encoders, axis=1) # do dot product of each input along each encoder (axis=1 tells it to go row-wise in self.encoders)
+        I = dot_product * self.gains + self.biases
 
         # Update membrane potential
         leak_factor = delta_t/self.tau_rc
@@ -73,8 +73,8 @@ class LIFCollection:
         self.output[:] = spike_mask / self.t_step # using in-place update here for performance <- using discrete approximation of dirac delta function
 
         # Calculate time spike occurs in time step
-        spike_time = delta_t + self.tau_rc * np.log((self.voltage[spike_mask] - I[spike_mask]) / (self.v_th[spike_mask] - I[spike_mask]))
-        self.refractory_time[spike_mask] = self.tau_ref + spike_time - delta_t # set refractory time countdown for spiking neurones
+        spike_time = self.tau_rc * np.log((self.voltage[spike_mask] - I[spike_mask]) / (self.v_th[spike_mask] - I[spike_mask])) + delta_t[spike_mask]
+        self.refractory_time[spike_mask] = self.tau_ref + spike_time - delta_t[spike_mask] # set refractory time countdown for spiking neurones
 
         # Reset voltage of spiking neurones
         self.voltage[spike_mask] = 0
@@ -86,3 +86,28 @@ class LIFCollection:
         self.voltage = np.ones(self.n) * self.v_init
         self.refractory_time = np.zeros(self.n)
         self.output = np.zeros(self.n)
+    
+def test_responses():
+    import matplotlib.pyplot as plt
+
+    T_step = 0.001
+    neurones = LIFCollection(n=10, dim=1, T_step=T_step)
+
+    def compute_response(neurone, inputs, T = 10):
+        spike_count = np.zeros(len(neurone.output))
+        for _ in np.arange(0, T, T_step):
+            output = neurone.step(inputs)
+            spike_count += output * T_step
+        return spike_count / T
+
+    inputs = np.arange(-1, 1, 0.05)
+    responses = []
+    for i in inputs:
+        response = compute_response(neurones, i)
+        responses.append(response)
+
+    plt.plot(inputs, responses)
+    plt.show()
+
+if __name__ == "__main__":
+    test_responses()
