@@ -67,8 +67,10 @@ class ALIFCollection:
         #    - dot product of each input with each encoder -> array of e_i . input_i
         #    - then element-wise multiplication by self.gains_i 
         #    - and element-wise addition by self.biases_i
-        dot_product = np.sum(inputs * self.encoders, axis=1) # do dot product of each input along each encoder (axis=1 tells it to go row-wise in self.encoders)
-        I = dot_product * self.gains + self.biases
+        # There is an error in the next 2 lines, so is replaced with correct code on line 73:
+        # dot_product = np.sum(inputs * self.encoders, axis=1) # do dot product of each input along each encoder (axis=1 tells it to go row-wise in self.encoders)
+        # I = dot_product * self.gains + self.biases
+        I = np.sum(self.biases + inputs * self.encoders * self.gains[:, np.newaxis], axis=0) / self.n
 
         # Update membrane potential
         leak_factor = delta_t/self.tau_rc
